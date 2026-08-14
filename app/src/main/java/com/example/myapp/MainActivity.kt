@@ -1,11 +1,10 @@
 package com.example.myapp
 
-import android.R
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +16,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.myapp.ui.screens.login.LoginScreen
+import com.example.myapp.ui.screens.register.RegisterScreen
+import com.example.myapp.ui.screens.recuperar.RecuperarScreen
+import com.example.myapp.ui.screens.minuta.MinutaScreen
 import com.example.myapp.ui.theme.MyAppTheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -27,33 +33,65 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Sebastian",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+                
+                NavHost(navController = navController, startDestination = "login") {
+                    composable("login") {
+                        LoginScreen(
+                            onLoginSuccess = {
+                                navController.navigate("minuta") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+                            },
+                            onNavigateToRegister = {
+                                Log.d("NAVEGACION", "Yendo a registro")
+                                navController.navigate("register")
+                            },
+                            onNavigateToForgotPassword = {
+                                navController.navigate("recuperar")
+                            }
+                        )
+                    }
+                    composable("register") {
+                        RegisterScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            },
+                            onRegisterSuccess = {
+                                navController.popBackStack() // Volver al login tras el registro
+                            }
+                        )
+                    }
+                    composable("recuperar") {
+                        RecuperarScreen(
+                            onNavigateBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+                    composable("minuta") {
+                        MinutaScreen(
+                            onLogout = {
+                                navController.navigate("login") {
+                                    popUpTo("minuta") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Surface(color = Color.Red) {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
-                .border(5.dp, Color.Black, shape = RoundedCornerShape(8.dp))
-                .padding(24.dp)
-        )
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun LoginPreview() {
     MyAppTheme {
-        Greeting("Sebastian")
+        LoginScreen(
+            onLoginSuccess = {},
+            onNavigateToRegister = {},
+            onNavigateToForgotPassword = {}
+        )
     }
 }
