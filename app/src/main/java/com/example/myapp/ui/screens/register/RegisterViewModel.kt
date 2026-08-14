@@ -18,11 +18,33 @@ class RegisterViewModel : ViewModel() {
     
     var mensajeError by mutableStateOf("")
         private set
+    
+    var genero by mutableStateOf("Hombre")
+        private set
+    
+    var objetivo by mutableStateOf("Mantener peso")
+        private set
+    
+    var aceptaTerminos by mutableStateOf(false)
+        private set
 
     // En una app real, usaríamos un Repositorio o Base de Datos.
     // Por ahora, usaremos una lista estática para simular persistencia.
     companion object {
         val usuariosRegistrados = mutableListOf<Usuario>()
+    }
+
+    fun onGeneroChange(nuevoGenero: String) {
+        genero = nuevoGenero
+    }
+
+    fun onObjetivoChange(nuevoObjetivo: String) {
+        objetivo = nuevoObjetivo
+    }
+
+    fun onAceptaTerminosChange(acepta: Boolean) {
+        aceptaTerminos = acepta
+        mensajeError = ""
     }
 
     fun onNombreChange(nuevoNombre: String) {
@@ -42,6 +64,10 @@ class RegisterViewModel : ViewModel() {
 
     fun registrarUsuario(onExito: () -> Unit) {
         if (nombre.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
+            if (!aceptaTerminos) {
+                mensajeError = "Debes aceptar los términos y condiciones"
+                return
+            }
             if (usuariosRegistrados.any { it.email == email }) {
                 mensajeError = "El correo ya está registrado"
             } else {
